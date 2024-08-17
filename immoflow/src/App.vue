@@ -13,7 +13,7 @@
   import IconField from 'primevue/iconfield';
   import MultiSelect from 'primevue/multiselect';
   import Dialog from 'primevue/dialog';
-
+  import FileUpload from 'primevue/fileupload';
 
   const filters = ref({
     global: { value: null, matchMode: 'contains' },
@@ -24,7 +24,8 @@
 
 
   const visible = ref(false);
-  const fileName = ref('');
+  const fileComment = ref('');
+  const currentFile = ref<File | null>(null);
 
   const showPopup = () => {
       visible.value = true;
@@ -35,12 +36,26 @@
   };
 
   const addFile = () => {
-      console.log('Adding file:', fileName.value);
+      let file = currentFile.value as File;
+
+      const newFile = {
+          filename: file.name,
+          category: 'Uncategorized',
+          size_bytes: file.size,
+          filetype: file.name.split('.').pop(),  
+          created_date: new Date().toISOString().split('T')[0],
+
+          description: fileComment.value,
+      };
+
+      files.value.push(newFile);
+
       hidePopup();
   };
 
-
-
+  const inputChange = (e: any) => {
+    currentFile.value = e.target.files[0]
+  }
 
 </script>
 
@@ -155,7 +170,6 @@
     </OverlayBadge>    </section>
   </header>
   <main class="p-4">
-
     <div class="border-round overflow-hidden">
       <DataTable v-model:filters="filters" :globalFilterFields="['filename', 'category']" :value="files" tableStyle="min-width: 50rem" removableSort>
         <template #header>
@@ -170,14 +184,21 @@
             </div>
             <div>
               <div>
-                <Button label="Datei Hochladen" icon="pi pi-plus" @click="showPopup" />
-                    <Dialog v-model="visible" title="Datei hochladen" :modal="true" :closable="false">
-                      <InputText v-model="fileName" placeholder="Enter file name" />
-                      <Button label="Add" icon="pi pi-check" @click="addFile" />
-                      <Button label="Cancel" icon="pi pi-times" @click="hidePopup" />
-                    </Dialog>
-                </div>
-
+                  <Button label="Datei Hochladen" icon="pi pi-plus" @click="showPopup" />
+                  <Dialog v-model:visible="visible" title="Datei hochladen" :modal="true" :closable="false">
+                    <div class="flex gap-2 flex-column">
+                      <div class="flex justify-content-start align-items-start flex-column gap-2">
+                        <input @change="inputChange" type="file"/>
+                        <!-- <FileUpload v-model="currentFile" mode="basic" accept="image/*" maxFileSize="1000000" @upload="addFile" /> -->
+                        <InputText v-model="fileComment" placeholder="Kommentar" />
+                      </div>
+                      <div class="flex gap-2">
+                        <Button class="flex-grow-1" label="Add" icon="pi pi-check" @click="addFile" />
+                        <Button class="flex-grow-3" label="Cancel" icon="pi pi-times" @click="hidePopup" severity="danger"/>
+                      </div>
+                    </div>
+                  </Dialog>
+              </div>
           </div>
           </section>
         </template>
@@ -190,6 +211,7 @@
             <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Suche nach Dateinamen" />
           </template>
         </Column>
+        <Column field="description" header="Beschreibung"></Column>
         <Column field="category" header="Kategorie" sortable></Column>
         <Column field="size_bytes" header="Größe" sortable></Column>
         <Column field="filetype" header="Dateityp" sortable></Column>
