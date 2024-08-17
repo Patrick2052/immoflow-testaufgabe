@@ -7,14 +7,40 @@
   import Column from 'primevue/column';
   import ColumnGroup from 'primevue/columngroup';   // optional
   import Row from 'primevue/row';                   // optional
+  import { listOfFiles } from './assets/fake-data';
+  import InputIcon from 'primevue/inputicon';
+  import InputText from 'primevue/inputtext';
+  import IconField from 'primevue/iconfield';
+  import MultiSelect from 'primevue/multiselect';
+  import Dialog from 'primevue/dialog';
 
 
-  const files = ref([
-    { code: 'P001', name: 'Product 1', category: 'Category 1', quantity: 10 },
-    { code: 'P002', name: 'Product 2', category: 'Category 2', quantity: 20 },
-    { code: 'P003', name: 'Product 3', category: 'Category 3', quantity: 30 },
-    { code: 'P004', name: 'Product 4', category: 'Category 4', quantity: 40 },
-  ])
+  const filters = ref({
+    global: { value: null, matchMode: 'contains' },
+    filename: { value: null, matchMode: 'contains' },
+  });
+
+  const files = ref(listOfFiles)
+
+
+  const visible = ref(false);
+  const fileName = ref('');
+
+  const showPopup = () => {
+      visible.value = true;
+  };
+
+  const hidePopup = () => {
+      visible.value = false;
+  };
+
+  const addFile = () => {
+      console.log('Adding file:', fileName.value);
+      hidePopup();
+  };
+
+
+
 
 </script>
 
@@ -131,11 +157,43 @@
   <main class="p-4">
 
     <div class="border-round overflow-hidden">
-      <DataTable :value="files" tableStyle="min-width: 50rem">
-        <Column field="code" header="Code"></Column>
-        <Column field="name" header="Name"></Column>
-        <Column field="category" header="Category"></Column>
-        <Column field="quantity" header="Quantity"></Column>
+      <DataTable v-model:filters="filters" :globalFilterFields="['filename', 'category']" :value="files" tableStyle="min-width: 50rem" removableSort>
+        <template #header>
+          <section class="flex align-items-center justify-content-between">
+            <div class="flex justify-end">
+                <IconField>
+                    <InputIcon>
+                        <i class="pi pi-search" />
+                    </InputIcon>
+                    <InputText v-model="filters['global'].value" placeholder="Globale Suche" />
+                </IconField>
+            </div>
+            <div>
+              <div>
+                <Button label="Datei Hochladen" icon="pi pi-plus" @click="showPopup" />
+                    <Dialog v-model="visible" title="Datei hochladen" :modal="true" :closable="false">
+                      <InputText v-model="fileName" placeholder="Enter file name" />
+                      <Button label="Add" icon="pi pi-check" @click="addFile" />
+                      <Button label="Cancel" icon="pi pi-times" @click="hidePopup" />
+                    </Dialog>
+                </div>
+
+          </div>
+          </section>
+        </template>
+        <template #empty>Keine Dateien Gefunden</template>
+        <Column field="filename" header="Dateiname" sortable style="min-width: 12rem">
+          <template #body="{ data }">
+            {{ data.filename }}
+          </template>
+          <template #filter="{ filterModel, filterCallback}">
+            <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Suche nach Dateinamen" />
+          </template>
+        </Column>
+        <Column field="category" header="Kategorie" sortable></Column>
+        <Column field="size_bytes" header="Größe" sortable></Column>
+        <Column field="filetype" header="Dateityp" sortable></Column>
+        <Column field="created_date" sortable header="Erstellt"></Column>
       </DataTable>
     </div>
 
