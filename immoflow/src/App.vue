@@ -57,6 +57,16 @@
     currentFile.value = e.target.files[0]
   }
 
+  const expandedRows = ref([]);
+
+  const onRowExpand = (event) => {
+    // console.log('Row expanded:', event.data);
+  };
+
+  const onRowCollapse = (event) => {
+    // console.log('Row collapsed:', event.data);
+  };
+
 </script>
 
 <template>
@@ -171,7 +181,7 @@
   </header>
   <main class="p-4">
     <div class="border-round overflow-hidden">
-      <DataTable v-model:filters="filters" :globalFilterFields="['filename', 'category']" :value="files" tableStyle="min-width: 50rem" removableSort>
+      <DataTable :expandedRows="expandedRows" @row-expand="onRowExpand" @row-collapse="onRowCollapse" dataKey="filename" v-model:filters="filters" :globalFilterFields="['filename', 'category']" :value="files" tableStyle="min-width: 50rem" removableSort>
         <template #header>
           <section class="flex align-items-center justify-content-between">
             <div class="flex justify-end">
@@ -203,6 +213,9 @@
           </section>
         </template>
         <template #empty>Keine Dateien Gefunden</template>
+        
+        <Column expander style="width: 3em"/>
+        
         <Column field="filename" header="Dateiname" sortable style="min-width: 12rem">
           <template #body="{ data }">
             {{ data.filename }}
@@ -216,6 +229,17 @@
         <Column field="size_bytes" header="Größe" sortable></Column>
         <Column field="filetype" header="Dateityp" sortable></Column>
         <Column field="created_date" sortable header="Erstellt"></Column>
+
+        <!-- <template #expandedRow="{ data }">
+          <div class="p-3">
+            <h5>Details for {{ data.filename }}</h5>
+            <p><strong>Category:</strong> {{ data.category }}</p>
+            <p><strong>Size:</strong> {{ data.size_bytes }} bytes</p>
+            <p><strong>File Type:</strong> {{ data.filetype }}</p>
+            <p><strong>Created Date:</strong> {{ data.created_date }}</p>
+            <p><strong>Description:</strong> {{ data.description }}</p>
+          </div>
+        </template> -->
       </DataTable>
     </div>
 
