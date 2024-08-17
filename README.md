@@ -1,7 +1,19 @@
 # immoflow-testaufgabe
 
+## install dependencies
 
-hatte unter der Woche keine Zeit. Sollte heute abend fertig sein. 
+```bash
+pnpm install
+npm install
+```
+
+## run app with
+
+```
+pnpm run dev
+npm run dev
+```
+
 
 
 # special tools
